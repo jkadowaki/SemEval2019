@@ -38,7 +38,6 @@ def main():
     test_label_file = 'labels-levela.csv'
 
     data_directory    = 'data'
-    results_directory = 'results'
     seed              = 100
     folds             = 10
     bert_train_file   = 'train.tsv'
