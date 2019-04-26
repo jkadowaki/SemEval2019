@@ -75,21 +75,30 @@ def get_results(directory, extension=".pdf", prefix=None):
 
 def main():
     
+    ############################################################################
+    #         AGGREGATE ALL INDIVIDUAL RESULTS INTO A SINGLE DATAFRAME         #
+    ############################################################################
+    
+    # Directories
     data_dir        = 'eval_data'
     results_dir     = 'epoch_results'
     plots_dir       = 'plots'
-    bert_dev_file   = 'dev.tsv'
-    bert_test_file  = 'test.tsv'
+    
+    # Gold Labels
+    label_file      = 'label.tsv'
+
+    # Constants
     steps_in_epoch  = 373
+    
+    # Generated Files
     plot_eval       = 'dev_results.pdf'
     final_eval_file = 'eval_results.csv'
     final_test_file = 'test_results.csv'
     
-
-    create_directory(plots_dir)
     
-    
-    ######### AGGREGATE ALL INDIVIDUAL RESULTS INTO A SINGLE DATAFRAME #########
+    ############################################################################
+    #         AGGREGATE ALL INDIVIDUAL RESULTS INTO A SINGLE DATAFRAME         #
+    ############################################################################
 
     # Crawl the Data Directory for Eval & Test Results Files
     eval_files = get_results(data_dir, prefix='eval_results_', extension='.txt')
@@ -143,7 +152,11 @@ def main():
     df_test.to_csv(os.path.join(data_dir, final_test_file), index=False, sep='\t')
 
 
-    ######################### DEV ACCURACY VS. EPOCHS ##########################
+    ############################################################################
+    #                         DEV ACCURACY VS. EPOCH                           #
+    ############################################################################
+
+    create_directory(plots_dir)
 
     plt.figure()
 
@@ -178,18 +191,28 @@ def main():
 
     for f in [0]:#np.unique(df_test['fold']):
         
-        probability = np.array([ row for row in
-            df_test[df_test['fold']==f].sort_values(by=['epoch'])['results'] ])
-            
+        # Probabilities & Predictions
+        results     = df_test[df_test['fold']==f].sort_values(by=['epoch'])['results']
+        probability = np.array([row for row in results])
         predictions = 1*(probability>0.5)
+        
+        # Gold Labels
+        labels = np.genfromtxt(os.path.join(data_dir, "fold{0}".format(f), label_file))
+        gold_matrix = np.empty([])
         
         # Similarity Metrics
         cos_sim_pred = sm.cosine_similarity(predictions)
         cos_sim_prob = sm.cosine_similarity(probability)
         overlap_pred = sm.overlap_percentage(predictions)
 
+        # Evaluation Metrics
+        accuracy_matrix   = em.accuracy( predictions, gold_matrix )
+        f1micro_matrix    = em.f1_metric(predictions, gold_matrix, average='micro')
+        f1macro_matrix    = em.f1_metric(predictions, gold_matrix, average='macro')
+        f1weighted_matrix = em.f1_metric(predictions, gold_matrix, average='weighted')
 
         # Comparison between Similarity Metrics
+        """
         plot_cospred_cosprob = "cospred_cosprob.pdf"
         plot_cospred_overlap = "cospred_overlap.pdf"
         plot_cosprob_overlap = "cosprob_overlap.pdf"
@@ -214,7 +237,7 @@ def main():
         plt.ylabel(r"$\mathrm{Overlap \, (\%)}$")
         plt.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches = 'tight')
         plt.close()
-
+        """
 
 ################################################################################
 
