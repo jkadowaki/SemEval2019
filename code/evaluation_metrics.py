@@ -30,7 +30,7 @@ def accuracy(prediction_matrix, gold_matrix):
 
 ################################################################################
 
-def f1_metric(prediction_matrix, gold_matrix, average='micro'):
+def f1_metric(prediction_matrix, gold_matrix, average='macro'):
     
     """
     Computes the accuracy between ___ and ___.

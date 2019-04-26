@@ -76,7 +76,7 @@ def get_results(directory, extension=".pdf", prefix=None):
 def main():
     
     ############################################################################
-    #         AGGREGATE ALL INDIVIDUAL RESULTS INTO A SINGLE DATAFRAME         #
+    #                            FILENAME CONVENSION                           #
     ############################################################################
     
     # Directories
@@ -109,8 +109,8 @@ def main():
     eval_dict_list = []
     test_dict_list = []
 
+
     for eval_file in eval_files:
-        
         # Save Evaluation Metrics into Dictionary
         eval_dict = {key:value for key,value in
                     zip(["eval_accuracy", "eval_loss", "global_step", "loss"],
@@ -121,13 +121,10 @@ def main():
         
         # Get the Fold from the File Path
         eval_dict["fold"]  = int(os.path.dirname(eval_file).split('/')[1][4:])
-        
-        # Saves Dictionary
         eval_dict_list.append(eval_dict)
 
 
     for test_file in test_files:
-        
         # Get the Fold & Epoch Number from the File Path
         fold  = int(os.path.dirname(test_file).split('/')[1][4:])
         epoch = int( os.path.splitext(os.path.basename(
@@ -136,12 +133,13 @@ def main():
         # Get Prediction
         try:
             results = np.genfromtxt(test_file, unpack=True, encoding='bytes')[0]
-            
-            # Saves Dictionary
             test_dict_list.append({"fold": fold, "epoch": epoch, "results": results})
-    
         except:
+            ### FUTURE: IMPLEMENT SOMETHING TO PREVENT SCRIPT FROM CRASHING
+            ###         DUE TO DIMENSION ERRORS WHEN COMPUTING ACC, F1_SCORES.
+            print("Count not process:", test_file)
             continue
+
 
     # Aggregated Results
     df_eval = pd.DataFrame(eval_dict_list)
@@ -184,9 +182,10 @@ def main():
     plt.savefig(os.path.join(plots_dir, plot_eval), bbox_inches = 'tight')
     plt.close()
 
-    #########################  ##########################
 
-    # Plot Results
+    ############################################################################
+    #         Comparison between Different Pairwise Similarity Metrics         #
+    ############################################################################
 
 
     for f in [0]:#np.unique(df_test['fold']):
@@ -197,19 +196,21 @@ def main():
         predictions = 1*(probability>0.5)
         
         # Gold Labels
-        labels = np.genfromtxt(os.path.join(data_dir, "fold{0}".format(f), label_file))
-        gold_matrix = np.empty([])
+        labels = np.genfromtxt(os.path.join(data_dir, "fold{0}".format(f), label_file))[:-1]
+        gold_matrix = np.tile(labels, [predictions.size // labels.size, 1])
         
-        # Similarity Metrics
+        # Similarity Metrics  (Matrix of Size [#epochs x #epochs])
         cos_sim_pred = sm.cosine_similarity(predictions)
         cos_sim_prob = sm.cosine_similarity(probability)
         overlap_pred = sm.overlap_percentage(predictions)
 
-        # Evaluation Metrics
-        accuracy_matrix   = em.accuracy( predictions, gold_matrix )
-        f1micro_matrix    = em.f1_metric(predictions, gold_matrix, average='micro')
-        f1macro_matrix    = em.f1_metric(predictions, gold_matrix, average='macro')
-        f1weighted_matrix = em.f1_metric(predictions, gold_matrix, average='weighted')
+        # Evaluation Metrics  (Vector of Size [#epochs])
+        accuracy   = em.accuracy( predictions, gold_matrix )
+        f1micro    = em.f1_metric(predictions, gold_matrix, average='micro')
+        f1macro    = em.f1_metric(predictions, gold_matrix, average='macro')
+        f1weighted = em.f1_metric(predictions, gold_matrix, average='weighted')
+
+        print(f, accuracy, f1micro, f1macro, f1weighted)
 
         # Comparison between Similarity Metrics
         """
@@ -238,6 +239,15 @@ def main():
         plt.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches = 'tight')
         plt.close()
         """
+
+        # Evaluation vs.
+
+for f in g.glob("epoch_results/test_results_*"):
+    test = np.genfromtxt(f, unpack=True)[1]
+
+for t in range(100):
+print(accuracy_score(test>thresh, lab[1:])-accuracy_score(test>0.5, lab[1:]))
+
 
 ################################################################################
 
