@@ -1,0 +1,5 @@
+eval_data/fold*/epoch_results/
+__pycache__
+.DS_Store
+*.pyc
+.DS_Store
