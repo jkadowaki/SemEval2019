@@ -160,13 +160,7 @@ def main():
     create_directory(plots_dir)
 
     plt.figure()
-
-    # Plot Baselines
     xlim = [min(df_eval["epoch"]), max(df_eval["epoch"])]
-    plt.plot(xlim, [0.829]*2, 'r--', label=r"$\mathrm{Top \, System}$")
-    plt.plot(xlim, [0.800]*2, 'k--', label=r"$\mathrm{CNN}$")
-    plt.plot(xlim, [0.750]*2, 'g--', label=r"$\mathrm{BiLSTM}$")
-    plt.plot(xlim, [0.690]*2, 'b--', label=r"$\mathrm{SVM}$")
 
     # Plot Results
     for f in np.unique(df_eval['fold']):
@@ -193,18 +187,24 @@ def main():
     threshold = 0.5
 
     # Track Plots
-    fig1, ax1 = plt.subplots()  # Dev Accuracy
-    fig2, ax1 = plt.subplots()  # Dev F1-Macro
-    fig3, ax1 = plt.subplots()  # Dev F1-Micro
-    fig4, ax1 = plt.subplots()  # Dev F1-Weighted
-    fig5, ax1 = plt.subplots()  # Cos Sim (Pred vs. Prob)
-    fig6, ax1 = plt.subplots()  # Cos Sim (Pred) vs. Overlap
-    fig7, ax1 = plt.subplots()  # Cos Sim (Prob) vs. Overlap
+    fig1, ax1 = plt.subplots()  # Dev Accuracy vs. Epoch
+    fig2, ax2 = plt.subplots()  # Dev F1-Macro vs. Epoch
+    fig3, ax3 = plt.subplots()  # Dev F1-Micro vs. Epoch
+    fig4, ax4 = plt.subplots()  # Dev F1-Weighted vs. Epoch
+    fig5, ax5 = plt.subplots()  # Cos Sim (Pred vs. Cos Sim (Prob)
+    fig6, ax6 = plt.subplots()  # Cos Sim (Pred) vs. Overlap
+    fig7, ax7 = plt.subplots()  # Cos Sim (Prob) vs. Overlap
 
     # Define Color Parameters
     folds = np.unique(df_test['fold'])
     NUM_COLORS = folds.size
     cm = plt.get_cmap('gist_rainbow')
+
+    # Plot Baselines
+    ax2.plot(xlim, [0.829]*2, 'r--', label=r"$\mathrm{Top \, System}$")
+    ax2.plot(xlim, [0.800]*2, 'g--', label=r"$\mathrm{CNN}$")
+    ax2.plot(xlim, [0.750]*2, 'k--', label=r"$\mathrm{BiLSTM}$")
+    ax2.plot(xlim, [0.690]*2, 'b--', label=r"$\mathrm{SVM}$")
 
 
     for f in folds:
@@ -217,7 +217,7 @@ def main():
 
         # Gold Labels
         labels = np.genfromtxt(os.path.join(data_dir, "fold{0}".format(f), label_file))
-        if predictions.shape[1] == labels.shape:
+        if predictions.shape[1] == labels.shape[0]:
             gold_matrix = np.tile(labels, [predictions.size // labels.size, 1])
         else:
             # Normally, this isnt needed, but I initially forgot to include the
@@ -232,53 +232,84 @@ def main():
 
         # Evaluation Metrics  (Vector of Size [#epochs])
         accuracy   = em.accuracy( predictions, gold_matrix )
-        f1micro    = em.f1_metric(predictions, gold_matrix, average='micro')
         f1macro    = em.f1_metric(predictions, gold_matrix, average='macro')
+        f1micro    = em.f1_metric(predictions, gold_matrix, average='micro')
         f1weighted = em.f1_metric(predictions, gold_matrix, average='weighted')
 
-        ax1.plot(epochs, accuracy)
-        ax2.plot(epochs, f1micro)
-        ax3.plot(epochs, f1macro)
-        ax4.plot(epochs, f1weighted)
+        # Plot: Evaluation Metrics vs. Epochs
+        ax1.plot(epochs, accuracy,   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
+        ax2.plot(epochs, f1macro,    label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
+        ax3.plot(epochs, f1micro,    label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
+        ax4.plot(epochs, f1weighted, label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
 
-        # Comparison between Similarity Metrics
-        ax5.scatter(cos_sim_pred, cos_sim_prob, s=0.5)
-        ax6.scatter(cos_sim_pred, 100*overlap_pred, s=0.5)
-        ax7.scatter(cos_sim_prob, 100*overlap_pred, s=0.5)
+        # Plot: Comparison between Similarity Metrics
+        ax5.scatter(cos_sim_pred, cos_sim_prob,     s=0.1, label=r"$\mathrm{{Fold \, {0} }}$".format(f))
+        ax6.scatter(cos_sim_pred, 100*overlap_pred, s=0.1, label=r"$\mathrm{{Fold \, {0} }}$".format(f))
+        ax7.scatter(cos_sim_prob, 100*overlap_pred, s=0.1, label=r"$\mathrm{{Fold \, {0} }}$".format(f))
 
-
+    # Dev Accuracy vs. Epoch
     ax1.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax1.set_xlim(0,100)
+    ax1.set_ylim(0.725, 0.85)
     ax1.set_xlabel(r"$\mathrm{Epochs}$")
-    ax1.set_ylabel(r"$\mathrm{Dev \, Accuracy}$")
-    ax1.close()
+    ax1.set_ylabel(r"$\mathrm{Accuracy}$")
+    fig1.savefig(os.path.join(plots_dir, plot_accuracy), bbox_inches = 'tight')
+    fig1.clf()
     
-    ax2.close()
+    # Dev F1-Macro vs. Epoch
+    ax2.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax2.set_xlim(0,100)
+    ax2.set_ylim(0.65, 0.83)
+    ax2.set_xlabel(r"$\mathrm{Epochs}$")
+    ax2.set_ylabel(r"$\mathrm{Macro-F1 \, Score}$")
+    fig2.savefig(os.path.join(plots_dir, plot_f1macro), bbox_inches='tight')
+    fig2.clf()
     
-    ax3.close()
+    # Dev F1-Micro vs. Epoch
+    ax3.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax3.set_xlim(0,100)
+    ax3.set_ylim(0.725, 0.85)
+    ax3.set_xlabel(r"$\mathrm{Epochs}$")
+    ax3.set_ylabel(r"$\mathrm{Micro-F1 \, Score}$")
+    fig3.savefig(os.path.join(plots_dir, plot_f1micro), bbox_inches='tight')
+    fig3.clf()
     
-
-    ax4.close()
+    # Dev F1-Weighted vs. Epoch
+    ax4.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax4.set_xlim(0,100)
+    ax4.set_ylim(0.725, 0.85)
+    ax4.set_xlabel(r"$\mathrm{Epochs}$")
+    ax4.set_ylabel(r"$\mathrm{Weighted-F1 \, Score}$")
+    fig4.savefig(os.path.join(plots_dir, plot_f1weighted), bbox_inches='tight')
+    fig4.clf()
     
+    # Cos Sim (Pred vs. Cos Sim (Prob)
+    ax5.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax5.plot([0,0], [1,1], 'k-', linewidth=1)
+    ax5.set_xlim(0,1)
+    ax5.set_ylim(0,1)
     ax5.set_xlabel(r"$\mathrm{Cosine \, Similarity \, (Predictions)}$")
     ax5.set_ylabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
-    ax5.savefig(os.path.join(plots_dir, plot_cospred_cosprob), bbox_inches = 'tight')
-    ax5.close()
+    fig5.savefig(os.path.join(plots_dir, plot_cospred_cosprob), bbox_inches='tight')
+    fig5.clf()
     
+    # Cos Sim (Pred) vs. Overlap
+    ax6.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax6.set_xlim(0,1)
+    ax6.set_ylim(0,100)
     ax6.set_xlabel(r"$\mathrm{Cosine \, Similarity \, (Predictions)}$")
     ax6.set_ylabel(r"$\mathrm{Overlap \, (\%)}$")
-    ax6.savefig(os.path.join(plots_dir, plot_cospred_overlap), bbox_inches = 'tight')
-    ax6.close()
+    fig6.savefig(os.path.join(plots_dir, plot_cospred_overlap), bbox_inches='tight')
+    fig6.clf()
     
-    ax7.xlabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
+    # Cos Sim (Prob) vs. Overlap
+    ax7.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax7.set_xlim(0,1)
+    ax7.set_ylim(0,100)
+    ax7.set_xlabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
     ax7.set_ylabel(r"$\mathrm{Overlap \, (\%)}$")
-    ax7.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches = 'tight')
-    ax7.close()
-
-    # Notes on Training:
-    # Currently training fold 5.
-    # Need ot finish predicting fold 4.
-    # Retar fold 4 results.
-    # Need to change predict_bert.sh script to fold 5 after...
+    fig7.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches='tight')
+    fig7.clf()
 
 
 ################################################################################
