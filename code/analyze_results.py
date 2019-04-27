@@ -9,7 +9,6 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-from sklearn.metrics import f1_score
 import seaborn as sns
 plt.rc('text', usetex=True)
 sns.set(font_scale=1.5, rc={'text.usetex' : True}, style="white", color_codes=True)
@@ -91,10 +90,16 @@ def main():
     steps_in_epoch  = 373
     
     # Generated Files
-    plot_eval       = 'dev_results.pdf'
     final_eval_file = 'eval_results.csv'
     final_test_file = 'test_results.csv'
-    
+    plot_eval            = "dev_results.pdf"
+    plot_accuracy        = "accuracy.pdf"
+    plot_f1micro         = "f1_micro.pdf"
+    plot_f1macro         = "f1_macro.pdf"
+    plot_f1weighted      = "f1_weighted.pdf"
+    plot_cospred_cosprob = "cospred_cosprob.pdf"
+    plot_cospred_overlap = "cospred_overlap.pdf"
+    plot_cosprob_overlap = "cosprob_overlap.pdf"
     
     ############################################################################
     #         AGGREGATE ALL INDIVIDUAL RESULTS INTO A SINGLE DATAFRAME         #
@@ -132,11 +137,9 @@ def main():
         
         # Get Prediction
         try:
-            results = np.genfromtxt(test_file, unpack=True, encoding='bytes')[0]
+            results = np.genfromtxt(test_file, unpack=True, encoding='bytes')[1]
             test_dict_list.append({"fold": fold, "epoch": epoch, "results": results})
         except:
-            ### FUTURE: IMPLEMENT SOMETHING TO PREVENT SCRIPT FROM CRASHING
-            ###         DUE TO DIMENSION ERRORS WHEN COMPUTING ACC, F1_SCORES.
             print("Count not process:", test_file)
             continue
 
@@ -187,18 +190,41 @@ def main():
     #         Comparison between Different Pairwise Similarity Metrics         #
     ############################################################################
 
+    threshold = 0.5
 
-    for f in [0]:#np.unique(df_test['fold']):
+    # Track Plots
+    fig1, ax1 = plt.subplots()  # Dev Accuracy
+    fig2, ax1 = plt.subplots()  # Dev F1-Macro
+    fig3, ax1 = plt.subplots()  # Dev F1-Micro
+    fig4, ax1 = plt.subplots()  # Dev F1-Weighted
+    fig5, ax1 = plt.subplots()  # Cos Sim (Pred vs. Prob)
+    fig6, ax1 = plt.subplots()  # Cos Sim (Pred) vs. Overlap
+    fig7, ax1 = plt.subplots()  # Cos Sim (Prob) vs. Overlap
+
+    # Define Color Parameters
+    folds = np.unique(df_test['fold'])
+    NUM_COLORS = folds.size
+    cm = plt.get_cmap('gist_rainbow')
+
+
+    for f in folds:
         
         # Probabilities & Predictions
-        results     = df_test[df_test['fold']==f].sort_values(by=['epoch'])['results']
-        probability = np.array([row for row in results])
-        predictions = 1*(probability>0.5)
-        
+        df_results  = df_test[df_test['fold']==f].sort_values(by=['epoch'])[['epoch','results']]
+        epochs      = df_results['epoch']
+        probability = np.array([row for row in df_results['results']])
+        predictions = 1*(probability>threshold)
+
         # Gold Labels
-        labels = np.genfromtxt(os.path.join(data_dir, "fold{0}".format(f), label_file))[:-1]
-        gold_matrix = np.tile(labels, [predictions.size // labels.size, 1])
-        
+        labels = np.genfromtxt(os.path.join(data_dir, "fold{0}".format(f), label_file))
+        if predictions.shape[1] == labels.shape:
+            gold_matrix = np.tile(labels, [predictions.size // labels.size, 1])
+        else:
+            # Normally, this isnt needed, but I initially forgot to include the
+            # 1 line header in the test.tsv files, so there's an off-by-1 error
+            # in some folds.
+            gold_matrix = np.tile(labels[1:], [predictions.size // (labels.size-1), 1])
+
         # Similarity Metrics  (Matrix of Size [#epochs x #epochs])
         cos_sim_pred = sm.cosine_similarity(predictions)
         cos_sim_prob = sm.cosine_similarity(probability)
@@ -210,43 +236,49 @@ def main():
         f1macro    = em.f1_metric(predictions, gold_matrix, average='macro')
         f1weighted = em.f1_metric(predictions, gold_matrix, average='weighted')
 
-        print(f, accuracy, f1micro, f1macro, f1weighted)
+        ax1.plot(epochs, accuracy)
+        ax2.plot(epochs, f1micro)
+        ax3.plot(epochs, f1macro)
+        ax4.plot(epochs, f1weighted)
 
         # Comparison between Similarity Metrics
-        """
-        plot_cospred_cosprob = "cospred_cosprob.pdf"
-        plot_cospred_overlap = "cospred_overlap.pdf"
-        plot_cosprob_overlap = "cosprob_overlap.pdf"
-        
-        plt.figure()
-        plt.scatter(cos_sim_pred, cos_sim_prob, s=0.5)
-        plt.xlabel(r"$\mathrm{Cosine \, Similarity \, (Predictions)}$")
-        plt.ylabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
-        plt.savefig(os.path.join(plots_dir, plot_cospred_cosprob), bbox_inches = 'tight')
-        plt.close()
+        ax5.scatter(cos_sim_pred, cos_sim_prob, s=0.5)
+        ax6.scatter(cos_sim_pred, 100*overlap_pred, s=0.5)
+        ax7.scatter(cos_sim_prob, 100*overlap_pred, s=0.5)
 
-        plt.figure()
-        plt.scatter(cos_sim_pred, 100*overlap_pred, s=0.5)
-        plt.xlabel(r"$\mathrm{Cosine \, Similarity \, (Predictions)}$")
-        plt.ylabel(r"$\mathrm{Overlap \, (\%)}$")
-        plt.savefig(os.path.join(plots_dir, plot_cospred_overlap), bbox_inches = 'tight')
-        plt.close()
 
-        plt.figure()
-        plt.scatter(cos_sim_prob, 100*overlap_pred, s=0.5)
-        plt.xlabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
-        plt.ylabel(r"$\mathrm{Overlap \, (\%)}$")
-        plt.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches = 'tight')
-        plt.close()
-        """
+    ax1.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax1.set_xlabel(r"$\mathrm{Epochs}$")
+    ax1.set_ylabel(r"$\mathrm{Dev \, Accuracy}$")
+    ax1.close()
+    
+    ax2.close()
+    
+    ax3.close()
+    
 
-        # Evaluation vs.
+    ax4.close()
+    
+    ax5.set_xlabel(r"$\mathrm{Cosine \, Similarity \, (Predictions)}$")
+    ax5.set_ylabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
+    ax5.savefig(os.path.join(plots_dir, plot_cospred_cosprob), bbox_inches = 'tight')
+    ax5.close()
+    
+    ax6.set_xlabel(r"$\mathrm{Cosine \, Similarity \, (Predictions)}$")
+    ax6.set_ylabel(r"$\mathrm{Overlap \, (\%)}$")
+    ax6.savefig(os.path.join(plots_dir, plot_cospred_overlap), bbox_inches = 'tight')
+    ax6.close()
+    
+    ax7.xlabel(r"$\mathrm{Cosine \, Similarity \, (Probability)}$")
+    ax7.set_ylabel(r"$\mathrm{Overlap \, (\%)}$")
+    ax7.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches = 'tight')
+    ax7.close()
 
-for f in g.glob("epoch_results/test_results_*"):
-    test = np.genfromtxt(f, unpack=True)[1]
-
-for t in range(100):
-print(accuracy_score(test>thresh, lab[1:])-accuracy_score(test>0.5, lab[1:]))
+    # Notes on Training:
+    # Currently training fold 5.
+    # Need ot finish predicting fold 4.
+    # Retar fold 4 results.
+    # Need to change predict_bert.sh script to fold 5 after...
 
 
 ################################################################################
