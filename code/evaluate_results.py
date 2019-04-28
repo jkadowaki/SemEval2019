@@ -279,17 +279,27 @@ def main(verbose=False):
         f1micro    = em.f1_metric(predictions, gold_matrix, average='micro')
         f1weighted = em.f1_metric(predictions, gold_matrix, average='weighted')
 
-        # Save Computation
-        results_dict.append({"fold":f, "epoch":epochs,
-                             "prediction":predictions, "probability":probability,
-                             "accuracy":accuracy, "f1_macro":f1macro,
-                             "f1_micro":f1micro, "f1_weighted":f1weighted})
+        for idx,e in enumerate(epochs):
+            # Save Computation
+            results_dict.append({"fold":        f,
+                                 "epoch":       e,
+                                 "prediction":  list(predictions[idx]),
+                                 "probability": list(probability[idx]),
+                                 "accuracy":    list(accuracy),
+                                 "f1_macro":    list(f1macro),
+                                 "f1_micro":    list(f1micro),
+                                 "f1_weighted": list(f1weighted),
+                                 "gold_label": list(gold_matrix[idx])} )
 
         # Plot: Evaluation Metrics vs. Epochs
-        ax1.plot(epochs, accuracy,   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
-        ax2.plot(epochs, f1macro,    label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
-        ax3.plot(epochs, f1micro,    label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
-        ax4.plot(epochs, f1weighted, label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1)
+        ax1.plot( epochs, accuracy,
+                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax2.plot( epochs, f1macro,
+                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax3.plot( epochs, f1micro,
+                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax4.plot( epochs, f1weighted,
+                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
 
         # Plot: Comparison between Similarity Metrics
         ax5.scatter( cos_sim_pred, cos_sim_prob,     marker='.', s=0.1,
@@ -302,7 +312,8 @@ def main(verbose=False):
 
     # Saving Evaluation Results
     df_eval_metrics = pd.DataFrame(results_dict)
-    df_eval_metrics.to_csv(os.path.join(data_dir, eval_metrics_file), index=False, sep='\t')
+    df_eval_metrics.to_csv(os.path.join(data_dir, eval_metrics_file),
+                           index=False, sep='\t')
 
     # Dev Accuracy vs. Epoch
     ax1.legend(loc='lower center', prop={'size': 12}, ncol=3)
