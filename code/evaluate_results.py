@@ -88,9 +88,10 @@ def main(verbose=False):
     steps_in_epoch  = 373
     
     # Generated Files
-    final_eval_file   = 'eval_results.csv'
-    final_test_file   = 'test_results.csv'
-    eval_metrics_file = 'eval_metrics.csv'
+    final_eval_file          = 'eval_results.csv'
+    final_test_file          = 'test_results.csv'
+    eval_metrics_file        = 'eval_metrics.csv'
+    eval_metrics_pickle_file = 'eval_metrics.pkl'
     plot_eval            = "dev_results.pdf"
     plot_accuracy        = "accuracy.pdf"
     plot_f1micro         = "f1_micro.pdf"
@@ -181,7 +182,8 @@ def main(verbose=False):
 
 
     ############################################################################
-    #         Comparison between Different Pairwise Similarity Metrics         #
+    #       1. Analyze Evaluation Metrics vs. Epoch                            #
+    #       2. Comparison between Different Pairwise Similarity Metrics        #
     ############################################################################
 
     # Track Plots
@@ -289,7 +291,7 @@ def main(verbose=False):
                                  "f1_macro":    list(f1macro),
                                  "f1_micro":    list(f1micro),
                                  "f1_weighted": list(f1weighted),
-                                 "gold_label": list(gold_matrix[idx])} )
+                                 "gold_label":  list(gold_matrix[idx])} )
 
         # Plot: Evaluation Metrics vs. Epochs
         ax1.plot( epochs, accuracy,
@@ -314,6 +316,7 @@ def main(verbose=False):
     df_eval_metrics = pd.DataFrame(results_dict)
     df_eval_metrics.to_csv(os.path.join(data_dir, eval_metrics_file),
                            index=False, sep='\t')
+    df_eval.to_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
 
     # Dev Accuracy vs. Epoch
     ax1.legend(loc='lower center', prop={'size': 12}, ncol=3)

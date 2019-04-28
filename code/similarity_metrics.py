@@ -44,12 +44,19 @@ def overlap_percentage(prediction_matrix):
 
     num_epochs, num_examples = np.shape(prediction_matrix)
 
-    overlap = np.empty([num_epochs, num_epochs])
+    overlap = -np.ones([num_epochs, num_epochs])
 
-    for row_idx, vec in enumerate(prediction_matrix):
-        overlap[row_idx, :] = np.sum([prediction_matrix[0]==row for row in prediction_matrix], axis=1)
+    for idx1, vec1 in enumerate(prediction_matrix):
+        for idx2, vec2 in enumerate(prediction_matrix):
 
-    return overlap / num_examples
+            if overlap[idx1, idx2] > 0:
+                continue
+            
+            overlap_value = np.sum(vec1 == vec2) / num_examples
+            overlap[idx1, idx2] = overlap_value
+            overlap[idx2, idx1] = overlap_value
+
+    return overlap
 
 ################################################################################
 
