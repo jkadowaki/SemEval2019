@@ -180,7 +180,7 @@ def main(verbose=False):
 
     ax1.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax1.set_xlim(0,100)
-    ax1.set_ylim(0.6, 0.83)
+    ax1.set_ylim(0.65, 0.83)
     ax1.set_xlabel(r"$\mathrm{Epochs}$")
     ax1.set_ylabel(r"$\mathrm{Macro-F1}$")
     ax1.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Prediction}$")
@@ -189,7 +189,7 @@ def main(verbose=False):
 
     ax2.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax2.set_xlim(0,100)
-    ax2.set_ylim(0.6, 0.83)
+    ax2.set_ylim(0.65, 0.83)
     ax2.set_xlabel(r"$\mathrm{Epochs}$")
     ax2.set_ylabel(r"$\mathrm{Macro-F1}$")
     ax2.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Prediction}$")
@@ -198,7 +198,7 @@ def main(verbose=False):
 
     ax3.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax3.set_xlim(0,100)
-    ax3.set_ylim(0.6, 0.83)
+    ax3.set_ylim(0.65, 0.83)
     ax3.set_xlabel(r"$\mathrm{Epochs}$")
     ax3.set_ylabel(r"$\mathrm{Macro-F1}$")
     ax3.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Prediction}$")
@@ -207,7 +207,7 @@ def main(verbose=False):
 
     ax4.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax4.set_xlim(0,100)
-    ax4.set_ylim(0.6, 0.83)
+    ax4.set_ylim(0.65, 0.83)
     ax4.set_xlabel(r"$\mathrm{Epochs}$")
     ax4.set_ylabel(r"$\mathrm{Macro-F1}$")
     ax4.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Probability}$")
@@ -216,16 +216,16 @@ def main(verbose=False):
 
     ax5.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax5.set_xlim(0,100)
-    ax5.set_ylim(0.6, 0.83)
+    ax5.set_ylim(0.65, 0.83)
     ax5.set_xlabel(r"$\mathrm{Epochs}$")
     ax5.set_ylabel(r"$\mathrm{Macro-F1}$")
     ax5.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Probability}$")
     fig5.savefig(os.path.join(plots_dir, plot_f1_ens3sw_prob), bbox_inches = 'tight')
     fig5.clf()
 
-    ax6.legend(loc='best', prop={'size': 10}, ncol=4)
+    ax6.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax6.set_xlim(0,100)
-    ax6.set_ylim(0.6, 0.83)
+    ax6.set_ylim(0.65, 0.83)
     ax6.set_xlabel(r"$\mathrm{Epochs}$")
     ax6.set_ylabel(r"$\mathrm{Macro-F1}$")
     ax6.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Probability}$")
@@ -233,7 +233,7 @@ def main(verbose=False):
     fig6.clf()
 
 
-    ax7.legend(loc='upper right', prop={'size': 10}, ncol=4)
+    ax7.legend(loc='lower right', prop={'size': 10}, ncol=4)
     ax7.set_xlim(1,10)
     #ax7.set_ylim(-0.3, 0.4)
     ax7.set_xlabel(r"$\mathrm{Epochs}$")
@@ -260,7 +260,7 @@ def main(verbose=False):
     fig9.savefig(os.path.join(plots_dir, plot_deltaf1_ens5sw_pred), bbox_inches = 'tight')
     fig9.clf()
 
-    ax10.legend(loc='upper right', prop={'size': 10}, ncol=4)
+    ax10.legend(loc='lower right', prop={'size': 10}, ncol=4)
     ax10.set_xlim(1,10)
     #ax10.set_ylim(-0.2, 0.3)
     ax10.set_xlabel(r"$\mathrm{Epochs}$")
@@ -278,7 +278,7 @@ def main(verbose=False):
     fig11.savefig(os.path.join(plots_dir, plot_deltaf1_ens3sw_prob), bbox_inches = 'tight')
     fig11.clf()
 
-    ax12.legend(loc='upper right', prop={'size': 10}, ncol=4)
+    ax12.legend(loc='lower right', prop={'size': 10}, ncol=4)
     ax12.set_xlim(2,11)
     #ax12.set_ylim(-0.15, 0.25)
     ax12.set_xlabel(r"$\mathrm{Epochs}$")
