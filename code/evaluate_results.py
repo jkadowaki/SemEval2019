@@ -250,8 +250,10 @@ def main(verbose=False):
                        "\tF1 (mean)", np.mean(f1macro[1:9]),
                        "\tF1 (max):", max(f1macro[1:9]) )
             
-            lw=2 if round(t,2) in [0.45, 0.50] else 0.5
-            ax8.plot(epochs[:10], f1macro[:10], linewidth=lw, label=str(round(t,2)))
+            lw=2 if round(t,2) in [0.4] else 0.5
+            ls='--' if round(t,2) in [0.5] else '-'
+            ax8.plot(epochs[:10], f1macro[:10],
+                     linewidth=lw, linestyle=ls, label=str(round(t,2)))
 
         ax8.legend(loc='lower right', prop={'size': 12}, ncol=4)
         ax8.set_xlim(0,9)
