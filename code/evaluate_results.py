@@ -255,7 +255,7 @@ def main(verbose=False):
             ax8.plot(epochs[:10], f1macro[:10],
                      linewidth=lw, linestyle=ls, label=str(round(t,2)))
 
-        ax8.legend(loc='lower right', prop={'size': 12}, ncol=4)
+        ax8.legend(loc='lower right', prop={'size': 10}, ncol=4)
         ax8.set_xlim(0,9)
         ax8.set_ylim(0.6, 0.8)
         ax8.set_xlabel(r"$\mathrm{Epochs}$")
@@ -267,7 +267,7 @@ def main(verbose=False):
         threshold = 0.4
         predictions = 1*(probability>threshold)
 
-
+        """
         ########################################################################
         #                              Evaluation                              #
         ########################################################################
@@ -380,7 +380,7 @@ def main(verbose=False):
     ax7.set_ylabel(r"$\mathrm{Overlap \, (\%)}$")
     fig7.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches='tight')
     fig7.clf()
-
+    """
 
 ################################################################################
 
