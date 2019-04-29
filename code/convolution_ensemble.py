@@ -32,14 +32,20 @@ def sliding_window(arr, num=3, threshold=0.5):
     
     num_row, num_col    = arr.shape
     ensemble_prediction = np.empty([num_row - num + 1, num_col])
-    
+    """
     for idx in range(num):
-        try:
+        if idx < num-1:
             ensemble_prediction += arr[idx:-num+1+idx]
-        except:
+        else:
             ensemble_prediction += arr[idx:]
-
+            
     return (ensemble_prediction/num > threshold).astype(int)
+    """
+    
+    for idx in range(ensemble_prediction.shape[0]):
+        ensemble_prediction[idx,:] = (np.sum(arr[idx:num+idx,:], axis=0)/num > threshold).astype(int)
+    
+    return ensemble_prediction
 
 
 ################################################################################
@@ -77,7 +83,7 @@ def main(verbose=False):
     # LOAD DATA
     # Columns: Index(['accuracy', 'epoch', 'f1_macro', 'f1_micro', 'f1_weighted',
     #                 'fold', 'gold_label', 'prediction', 'probability']
-    eval = load_data(data_dir, eval_metrics_pickle_file)
+    df_eval = load_data(data_dir, eval_metrics_pickle_file)
 
 
     ############################################################################
@@ -109,7 +115,7 @@ def main(verbose=False):
     for ax in [ax7,ax8,ax9,ax10,ax11,ax12]:
         ax.plot([0,10], [0,0], 'k-', linewidth=1)
 
-    folds = np.unique(eval['fold'])
+    folds = np.unique(df_eval['fold'])
 
     for f in folds:
         
@@ -135,12 +141,12 @@ def main(verbose=False):
         f1_ens5sw_prob = em.f1_metric(ens5sw_prob, gold_labels)
 
         # Delta Macro-F1 Scores of Sliding Window Ensemble
-        deltaf1_ens2sw_pred = f1_ens2sw_pred - f1_scores[:f1_ens2sw_pred.size]
-        deltaf1_ens3sw_pred = f1_ens3sw_pred - f1_scores[:f1_ens3sw_pred.size]
-        deltaf1_ens5sw_pred = f1_ens5sw_pred - f1_scores[:f1_ens5sw_pred.size]
-        deltaf1_ens2sw_prob = f1_ens2sw_prob - f1_scores[:f1_ens2sw_prob.size]
-        deltaf1_ens3sw_prob = f1_ens3sw_prob - f1_scores[:f1_ens3sw_prob.size]
-        deltaf1_ens5sw_prob = f1_ens5sw_prob - f1_scores[:f1_ens5sw_prob.size]
+        deltaf1_ens2sw_pred = f1_ens2sw_pred - f1_scores[1:f1_ens2sw_pred.size+1]
+        deltaf1_ens3sw_pred = f1_ens3sw_pred - f1_scores[1:f1_ens3sw_pred.size+1]
+        deltaf1_ens5sw_pred = f1_ens5sw_pred - f1_scores[2:f1_ens5sw_pred.size+2]
+        deltaf1_ens2sw_prob = f1_ens2sw_prob - f1_scores[1:f1_ens2sw_prob.size+1]
+        deltaf1_ens3sw_prob = f1_ens3sw_prob - f1_scores[1:f1_ens3sw_prob.size+1]
+        deltaf1_ens5sw_prob = f1_ens5sw_prob - f1_scores[2:f1_ens5sw_prob.size+2]
 
 
         # Plots
@@ -150,7 +156,7 @@ def main(verbose=False):
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
         ax3.plot( epochs[2:-2], f1_ens5sw_pred,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax4.plot( epochs[0:-1], f1_ens2sw_prob,
+        ax4.plot( epochs[1:], f1_ens2sw_prob,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
         ax5.plot( epochs[1:-1], f1_ens3sw_prob,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
