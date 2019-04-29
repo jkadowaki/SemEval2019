@@ -20,22 +20,8 @@ sys.path.append("./code")
 import similarity_metrics as sm
 import evaluation_metrics as em
 import evaluate_results   as er
+from load_data  import load_data, extract_fold_metrics
 
-
-################################################################################
-
-def convert_str_to_array(df, columns):
-    """
-    :Args:
-    df (pd.DataFrame)
-    columns (List of Strings)
-    """
-    for col in columns:
-        for idx,elem in enumerate(df[col]):
-            try:
-                df[col][idx]=np.array(elem.strip("[]").split(", ")).astype(float)
-            except:
-                pass
 
 ################################################################################
 
@@ -61,15 +47,15 @@ def sliding_window(arr, num=3, threshold=0.5):
 
 def main(verbose=False):
     
-    # Directories
+    ##### Directories #####
     data_dir  = 'eval_data'
     plots_dir = 'plots'
 
-    # Data File
+    ###### Data File ######
     eval_metrics_file = 'eval_metrics.csv'
     eval_metrics_pickle_file = 'eval_metrics.pkl'
     
-    # Generated Files
+    ### Generated Files ###
     plot_f1_ens2sw_pred = "f1_e2sw_pred.pdf"
     plot_f1_ens3sw_pred = "f1_e3sw_pred.pdf"
     plot_f1_ens5sw_pred = "f1_e5sw_pred.pdf"
@@ -84,17 +70,14 @@ def main(verbose=False):
     plot_deltaf1_ens3sw_prob = "deltaf1_e3sw_prob.pdf"
     plot_deltaf1_ens5sw_prob = "deltaf1_e5sw_prob.pdf"
 
-    # Constants
+    ###### Constants ######
     max_epoch = 100
     
-    # Load Data
-    try:
-        eval = pd.read_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
-    except:
-        eval = pd.read_csv(os.path.join(data_dir, eval_metrics_file), sep='\t')
-        convert_str_to_array(eval, ['accuracy', 'f1_macro', 'f1_micro', 'gold_label',
-                                    'f1_weighted', 'probability', 'prediction'])
-        eval.to_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
+    
+    # LOAD DATA
+    # Columns: Index(['accuracy', 'epoch', 'f1_macro', 'f1_micro', 'f1_weighted',
+    #                 'fold', 'gold_label', 'prediction', 'probability']
+    eval = load_data(data_dir, eval_metrics_pickle_file)
 
 
     ############################################################################
@@ -130,12 +113,10 @@ def main(verbose=False):
 
     for f in folds:
         
-        df_fold     = eval[eval['fold']==f]
-        epochs      = df_fold['epoch'].values
-        probability = np.vstack(df_fold['probability'].values)
-        predictions = np.vstack(df_fold['prediction'].values)
-        gold_labels = np.vstack(df_fold['gold_label'].values)
-        f1_scores   = df_fold['f1_macro'].values[0]
+        # Fold Metrics
+        epochs, f1_scores, gold_labels, \
+            predictions, probability = extract_fold_metrics(df_eval, fold=f)
+        
 
         # Sliding Window Predictions
         ens2sw_pred = sliding_window(predictions, 2)

@@ -20,50 +20,7 @@ sys.path.append("./code")
 import similarity_metrics as sm
 import evaluation_metrics as em
 import evaluate_results   as er
-from PIL import Image
-
-
-################################################################################
-
-def convert_str_to_array(df, columns):
-    """
-    :Args:
-    df (pd.DataFrame)
-    columns (List of Strings)
-    """
-    for col in columns:
-        for idx,elem in enumerate(df[col]):
-            try:
-                df[col][idx]=np.array(elem.strip("[]").split(", ")).astype(float)
-            except:
-                pass
-
-################################################################################
-
-def pairwise_f1(probability_matrix, gold_labels, threshold=0.45):
-    """
-    Ensemble the nearest num predictions.
-    """
-    
-    num_epochs, num_examples = np.shape(probability_matrix)
-    ensemble_f1 = -np.ones([num_epochs, num_epochs])
-    
-    for idx1, vec1 in enumerate(probability_matrix):
-        for idx2, vec2 in enumerate(probability_matrix):
-            
-            if idx1 < idx2:
-                continue
-            
-            prediction = ((vec1 + vec2)/2 > threshold).astype(int)
-            try:
-                f1 = em.f1_score(prediction, gold_labels[0], average='macro')
-            except:
-                f1 = em.f1_score(prediction, gold_labels[0,1:], average='macro')
-            
-            ensemble_f1[idx1, idx2] = f1
-            ensemble_f1[idx2, idx1] = f1
-    
-    return ensemble_f1
+from load_data  import load_data, extract_fold_metrics
 
 
 ################################################################################
@@ -71,15 +28,15 @@ def pairwise_f1(probability_matrix, gold_labels, threshold=0.45):
 
 def main(verbose=False):
     
-    # Directories
+    ##### Directories #####
     data_dir  = 'eval_data'
     plots_dir = 'plots'
 
-    # Data File
+    ###### Data File ######
     eval_metrics_file = 'eval_metrics.csv'
     eval_metrics_pickle_file = 'eval_metrics.pkl'
 
-    # Generated Files
+    ### Generated Files ###
     plot_ol_pairf1 = "overlap_pairf1.pdf"
 
     image_overlap = "overlap_matrix_fold{0}.pdf"
@@ -87,17 +44,14 @@ def main(verbose=False):
     image_csprob  = "csprob_matrix_fold{0}.pdf"
     image_pairf1  = "pairf1_fold{0}.pdf"
     
-    # Constants
+    ###### Constants ######
     max_epoch = 100
     
-    # Load Data
-    try:
-        eval = pd.read_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
-    except:
-        eval = pd.read_csv(os.path.join(data_dir, eval_metrics_file), sep='\t')
-        convert_str_to_array(eval, ['accuracy', 'f1_macro', 'f1_micro', 'gold_label',
-                                    'f1_weighted', 'probability', 'prediction'])
-        eval.to_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
+    
+    # LOAD DATA
+    # Columns: Index(['accuracy', 'epoch', 'f1_macro', 'f1_micro', 'f1_weighted',
+    #                 'fold', 'gold_label', 'prediction', 'probability']
+    eval = load_data(data_dir, eval_metrics_pickle_file)
 
 
     ############################################################################
@@ -124,13 +78,10 @@ def main(verbose=False):
 
     for f in folds:
 
-        df_fold     = eval[eval['fold']==f]
-        epochs      = df_fold['epoch'].values
-        probability = np.vstack(df_fold['probability'].values)
-        predictions = np.vstack(df_fold['prediction'].values)
-        gold_labels = np.vstack(df_fold['gold_label'].values)
-        f1_scores   = df_fold['f1_macro'].values[0]
-
+        # Fold Metrics
+        epochs, f1_scores, gold_labels, \
+            predictions, probability = extract_fold_metrics(df_eval, fold=f)
+                
 
         # Similarity Metrics  (Matrix of Size [#epochs x #epochs])
         cos_sim_pred = sm.cosine_similarity(predictions)
@@ -165,7 +116,7 @@ def main(verbose=False):
         plt.close()
 
 
-        pairf1 = pairwise_f1(probability, gold_labels, threshold=0.45)
+        pairf1 = em.pairwise_f1(probability, gold_labels, threshold=0.45)
         plt.figure()
         plt.imshow(pairf1, interpolation='nearest')
         plt.clim(0.6,0.85)
@@ -191,7 +142,7 @@ def main(verbose=False):
     fig1.clf()
 
 
-    
+
 ################################################################################
 
 if __name__ == '__main__':
