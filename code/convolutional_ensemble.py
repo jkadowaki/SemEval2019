@@ -65,16 +65,20 @@ def main(verbose=False):
     plot_f1_ens2sw_pred = "f1_e2sw_pred.pdf"
     plot_f1_ens3sw_pred = "f1_e3sw_pred.pdf"
     plot_f1_ens5sw_pred = "f1_e5sw_pred.pdf"
+    plot_f1_ens9sw_pred = "f1_e9sw_pred.pdf"
     plot_f1_ens2sw_prob = "f1_e2sw_prob.pdf"
     plot_f1_ens3sw_prob = "f1_e3sw_prob.pdf"
     plot_f1_ens5sw_prob = "f1_e5sw_prob.pdf"
+    plot_f1_ens9sw_prob = "f1_e9sw_prob.pdf"
 
     plot_deltaf1_ens2sw_pred = "deltaf1_e2sw_pred.pdf"
     plot_deltaf1_ens3sw_pred = "deltaf1_e3sw_pred.pdf"
     plot_deltaf1_ens5sw_pred = "deltaf1_e5sw_pred.pdf"
+    plot_deltaf1_ens9sw_pred = "deltaf1_e9sw_pred.pdf"
     plot_deltaf1_ens2sw_prob = "deltaf1_e2sw_prob.pdf"
     plot_deltaf1_ens3sw_prob = "deltaf1_e3sw_prob.pdf"
     plot_deltaf1_ens5sw_prob = "deltaf1_e5sw_prob.pdf"
+    plot_deltaf1_ens9sw_prob = "deltaf1_e9sw_prob.pdf"
 
     ###### Constants ######
     max_epoch = 100
@@ -93,26 +97,31 @@ def main(verbose=False):
     fig1, ax1 = plt.subplots()  # F1-Macro for Ensemble E2SW_Pred vs. Epoch
     fig2, ax2 = plt.subplots()  # F1-Macro for Ensemble E3SW_Pred vs. Epoch
     fig3, ax3 = plt.subplots()  # F1-Macro for Ensemble E5SW_Pred vs. Epoch
-    fig4, ax4 = plt.subplots()  # F1-Macro for Ensemble E2SW_Prob vs. Epoch
-    fig5, ax5 = plt.subplots()  # F1-Macro for Ensemble E3SW_Prob vs. Epoch
-    fig6, ax6 = plt.subplots()  # F1-Macro for Ensemble E5SW_Prob vs. Epoch
+    fig4, ax4 = plt.subplots()  # F1-Macro for Ensemble E9SW_Pred vs. Epoch
+    fig5, ax5 = plt.subplots()  # F1-Macro for Ensemble E2SW_Prob vs. Epoch
+    fig6, ax6 = plt.subplots()  # F1-Macro for Ensemble E3SW_Prob vs. Epoch
+    fig7, ax7 = plt.subplots()  # F1-Macro for Ensemble E5SW_Prob vs. Epoch
+    fig8, ax8 = plt.subplots()  # F1-Macro for Ensemble E9SW_Prob vs. Epoch
 
-    fig7,  ax7  = plt.subplots()  # Delta F1-Macro for Ensemble E2SW_Pred vs. Epoch
-    fig8,  ax8  = plt.subplots()  # Delta F1-Macro for Ensemble E3SW_Pred vs. Epoch
-    fig9,  ax9  = plt.subplots()  # Delta F1-Macro for Ensemble E5SW_Pred vs. Epoch
-    fig10, ax10 = plt.subplots()  # Delta F1-Macro for Ensemble E2SW_Prob vs. Epoch
-    fig11, ax11 = plt.subplots()  # Delta F1-Macro for Ensemble E3SW_Prob vs. Epoch
-    fig12, ax12 = plt.subplots()  # Delta F1-Macro for Ensemble E5SW_Prob vs. Epoch
+    fig9,  ax9  = plt.subplots()  # Delta F1-Macro for Ensemble E2SW_Pred vs. Epoch
+    fig10, ax10 = plt.subplots()  # Delta F1-Macro for Ensemble E3SW_Pred vs. Epoch
+    fig11, ax11 = plt.subplots()  # Delta F1-Macro for Ensemble E5SW_Pred vs. Epoch
+    fig12, ax12 = plt.subplots()  # Delta F1-Macro for Ensemble E9SW_Pred vs. Epoch
+    fig13, ax13 = plt.subplots()  # Delta F1-Macro for Ensemble E2SW_Prob vs. Epoch
+    fig14, ax14 = plt.subplots()  # Delta F1-Macro for Ensemble E3SW_Prob vs. Epoch
+    fig15, ax15 = plt.subplots()  # Delta F1-Macro for Ensemble E5SW_Prob vs. Epoch
+    fig16, ax16 = plt.subplots()  # Delta F1-Macro for Ensemble E9SW_Prob vs. Epoch
+
 
     # Plot Baselines
     xlim=[0,100]
-    for ax in [ax1, ax2, ax3, ax4, ax5, ax6]:
+    for ax in [ax1, ax2, ax3, ax4, ax5, ax6, ax7, ax8]:
         ax.plot(xlim, [0.829]*2, 'r--', label=r"$\mathrm{Top \, System}$")
         ax.plot(xlim, [0.800]*2, 'g--', label=r"$\mathrm{CNN}$")
         ax.plot(xlim, [0.750]*2, 'k--', label=r"$\mathrm{BiLSTM}$")
         ax.plot(xlim, [0.690]*2, 'b--', label=r"$\mathrm{SVM}$")
 
-    for ax in [ax7,ax8,ax9,ax10,ax11,ax12]:
+    for ax in [ax9,ax10,ax11,ax12,ax13,ax14,ax15,ax16]:
         ax.plot([0,10], [0,0], 'k-', linewidth=1)
 
     folds = np.unique(df_eval['fold'])
@@ -128,25 +137,31 @@ def main(verbose=False):
         ens2sw_pred = sliding_window(predictions, 2)
         ens3sw_pred = sliding_window(predictions, 3)
         ens5sw_pred = sliding_window(predictions, 5)
-        ens2sw_prob = sliding_window(probability, 2, threshold=0.45)
-        ens3sw_prob = sliding_window(probability, 3, threshold=0.45)
-        ens5sw_prob = sliding_window(probability, 5, threshold=0.45)
+        ens9sw_pred = sliding_window(predictions, 9)
+        ens2sw_prob = sliding_window(probability, 2, threshold=0.4)
+        ens3sw_prob = sliding_window(probability, 3, threshold=0.4)
+        ens5sw_prob = sliding_window(probability, 5, threshold=0.4)
+        ens9sw_prob = sliding_window(probability, 9, threshold=0.4)
 
         # Macro-F1 Scores of Sliding Window Ensemble
         f1_ens2sw_pred = em.f1_metric(ens2sw_pred, gold_labels)
         f1_ens3sw_pred = em.f1_metric(ens3sw_pred, gold_labels)
         f1_ens5sw_pred = em.f1_metric(ens5sw_pred, gold_labels)
+        f1_ens9sw_pred = em.f1_metric(ens9sw_pred, gold_labels)
         f1_ens2sw_prob = em.f1_metric(ens2sw_prob, gold_labels)
         f1_ens3sw_prob = em.f1_metric(ens3sw_prob, gold_labels)
         f1_ens5sw_prob = em.f1_metric(ens5sw_prob, gold_labels)
+        f1_ens9sw_prob = em.f1_metric(ens9sw_prob, gold_labels)
 
         # Delta Macro-F1 Scores of Sliding Window Ensemble
         deltaf1_ens2sw_pred = f1_ens2sw_pred - f1_scores[1:f1_ens2sw_pred.size+1]
         deltaf1_ens3sw_pred = f1_ens3sw_pred - f1_scores[1:f1_ens3sw_pred.size+1]
         deltaf1_ens5sw_pred = f1_ens5sw_pred - f1_scores[2:f1_ens5sw_pred.size+2]
+        deltaf1_ens9sw_pred = f1_ens9sw_pred - f1_scores[4:f1_ens9sw_pred.size+4]
         deltaf1_ens2sw_prob = f1_ens2sw_prob - f1_scores[1:f1_ens2sw_prob.size+1]
         deltaf1_ens3sw_prob = f1_ens3sw_prob - f1_scores[1:f1_ens3sw_prob.size+1]
         deltaf1_ens5sw_prob = f1_ens5sw_prob - f1_scores[2:f1_ens5sw_prob.size+2]
+        deltaf1_ens9sw_prob = f1_ens9sw_prob - f1_scores[4:f1_ens9sw_prob.size+4]
 
 
         # Plots
@@ -156,25 +171,34 @@ def main(verbose=False):
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
         ax3.plot( epochs[2:-2], f1_ens5sw_pred,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax4.plot( epochs[1:], f1_ens2sw_prob,
+        ax4.plot( epochs[4:-4], f1_ens9sw_pred,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax5.plot( epochs[1:-1], f1_ens3sw_prob,
+        ax5.plot( epochs[1:], f1_ens2sw_prob,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax6.plot( epochs[2:-2], f1_ens5sw_prob,
+        ax6.plot( epochs[1:-1], f1_ens3sw_prob,
+                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax7.plot( epochs[2:-2], f1_ens5sw_prob,
+                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax8.plot( epochs[4:-4], f1_ens9sw_prob,
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
 
-        ax7.plot( epochs[1:11], deltaf1_ens2sw_pred[:10],
+        ax9.plot( epochs[1:11], deltaf1_ens2sw_pred[:10],
                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax8.plot( epochs[1:11], deltaf1_ens3sw_pred[:10],
-                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax9.plot( epochs[2:12], deltaf1_ens5sw_pred[:10],
-                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax10.plot( epochs[1:11], deltaf1_ens2sw_prob[:10],
-                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax11.plot( epochs[1:11], deltaf1_ens3sw_prob[:10],
-                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
-        ax12.plot( epochs[2:12], deltaf1_ens5sw_prob[:10],
-                  label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax10.plot( epochs[1:11], deltaf1_ens3sw_pred[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax11.plot( epochs[2:12], deltaf1_ens5sw_pred[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax12.plot( epochs[4:14], deltaf1_ens5sw_pred[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax13.plot( epochs[1:11], deltaf1_ens2sw_prob[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax14.plot( epochs[1:11], deltaf1_ens3sw_prob[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax15.plot( epochs[2:12], deltaf1_ens5sw_prob[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+        ax16.plot( epochs[4:14], deltaf1_ens5sw_prob[:10],
+                   label=r"$\mathrm{{Fold \, {0} }}$".format(f), linewidth=1 )
+    
 
 
 
@@ -205,13 +229,14 @@ def main(verbose=False):
     fig3.savefig(os.path.join(plots_dir, plot_f1_ens5sw_pred), bbox_inches = 'tight')
     fig3.clf()
 
+
     ax4.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax4.set_xlim(0,100)
     ax4.set_ylim(0.65, 0.83)
     ax4.set_xlabel(r"$\mathrm{Epochs}$")
     ax4.set_ylabel(r"$\mathrm{Macro-F1}$")
-    ax4.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Probability}$")
-    fig4.savefig(os.path.join(plots_dir, plot_f1_ens2sw_prob), bbox_inches = 'tight')
+    ax4.set_title(r"$\mathrm{Sliding \, Window \, (n=9) \, Over \, Prediction}$")
+    fig4.savefig(os.path.join(plots_dir, plot_f1_ens9sw_pred), bbox_inches = 'tight')
     fig4.clf()
 
     ax5.legend(loc='lower center', prop={'size': 10}, ncol=4)
@@ -219,8 +244,8 @@ def main(verbose=False):
     ax5.set_ylim(0.65, 0.83)
     ax5.set_xlabel(r"$\mathrm{Epochs}$")
     ax5.set_ylabel(r"$\mathrm{Macro-F1}$")
-    ax5.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Probability}$")
-    fig5.savefig(os.path.join(plots_dir, plot_f1_ens3sw_prob), bbox_inches = 'tight')
+    ax5.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Probability}$")
+    fig5.savefig(os.path.join(plots_dir, plot_f1_ens2sw_prob), bbox_inches = 'tight')
     fig5.clf()
 
     ax6.legend(loc='lower center', prop={'size': 10}, ncol=4)
@@ -228,64 +253,99 @@ def main(verbose=False):
     ax6.set_ylim(0.65, 0.83)
     ax6.set_xlabel(r"$\mathrm{Epochs}$")
     ax6.set_ylabel(r"$\mathrm{Macro-F1}$")
-    ax6.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Probability}$")
-    fig6.savefig(os.path.join(plots_dir, plot_f1_ens5sw_prob), bbox_inches = 'tight')
+    ax6.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Probability}$")
+    fig6.savefig(os.path.join(plots_dir, plot_f1_ens3sw_prob), bbox_inches = 'tight')
     fig6.clf()
 
-
-    ax7.legend(loc='lower right', prop={'size': 10}, ncol=4)
-    ax7.set_xlim(1,10)
-    #ax7.set_ylim(-0.3, 0.4)
+    ax7.legend(loc='lower center', prop={'size': 10}, ncol=4)
+    ax7.set_xlim(0,100)
+    ax7.set_ylim(0.65, 0.83)
     ax7.set_xlabel(r"$\mathrm{Epochs}$")
-    ax7.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
-    ax7.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Prediction}$")
-    fig7.savefig(os.path.join(plots_dir, plot_deltaf1_ens2sw_pred), bbox_inches = 'tight')
+    ax7.set_ylabel(r"$\mathrm{Macro-F1}$")
+    ax7.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Probability}$")
+    fig7.savefig(os.path.join(plots_dir, plot_f1_ens5sw_prob), bbox_inches = 'tight')
     fig7.clf()
-    
-    ax8.legend(loc='upper right', prop={'size': 10}, ncol=4)
-    ax8.set_xlim(1,10)
-    #ax8.set_ylim(-0.2, 0.25)
+
+    ax8.legend(loc='lower center', prop={'size': 10}, ncol=4)
+    ax8.set_xlim(0,100)
+    ax8.set_ylim(0.65, 0.83)
     ax8.set_xlabel(r"$\mathrm{Epochs}$")
-    ax8.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
-    ax8.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Prediction}$")
-    fig8.savefig(os.path.join(plots_dir, plot_deltaf1_ens3sw_pred), bbox_inches = 'tight')
+    ax8.set_ylabel(r"$\mathrm{Macro-F1}$")
+    ax8.set_title(r"$\mathrm{Sliding \, Window \, (n=9) \, Over \, Probability}$")
+    fig8.savefig(os.path.join(plots_dir, plot_f1_ens9sw_prob), bbox_inches = 'tight')
     fig8.clf()
-    
-    ax9.legend(loc='upper right', prop={'size': 10}, ncol=4)
-    ax9.set_xlim(2,11)
-    #ax9.set_ylim(-0.25, 0.25)
+
+    ax9.legend(loc='lower right', prop={'size': 10}, ncol=4)
+    ax9.set_xlim(1,10)
+    ax9.set_ylim(-0.15, 0.1)
     ax9.set_xlabel(r"$\mathrm{Epochs}$")
     ax9.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
-    ax9.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Prediction}$")
-    fig9.savefig(os.path.join(plots_dir, plot_deltaf1_ens5sw_pred), bbox_inches = 'tight')
+    ax9.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Prediction}$")
+    fig9.savefig(os.path.join(plots_dir, plot_deltaf1_ens2sw_pred), bbox_inches = 'tight')
     fig9.clf()
-
+    
     ax10.legend(loc='lower right', prop={'size': 10}, ncol=4)
     ax10.set_xlim(1,10)
-    #ax10.set_ylim(-0.2, 0.3)
+    ax10.set_ylim(-0.15, 0.1)
     ax10.set_xlabel(r"$\mathrm{Epochs}$")
     ax10.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
-    ax10.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Probability}$")
-    fig10.savefig(os.path.join(plots_dir, plot_deltaf1_ens2sw_prob), bbox_inches = 'tight')
+    ax10.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Prediction}$")
+    fig10.savefig(os.path.join(plots_dir, plot_deltaf1_ens3sw_pred), bbox_inches = 'tight')
     fig10.clf()
-
-    ax11.legend(loc='upper right', prop={'size': 10}, ncol=4)
-    ax11.set_xlim(1,10)
-    #ax11.set_ylim(-0.2,0.25)
+    
+    ax11.legend(loc='lower right', prop={'size': 10}, ncol=4)
+    ax11.set_xlim(2,11)
+    ax11.set_ylim(-0.15, 0.1)
     ax11.set_xlabel(r"$\mathrm{Epochs}$")
     ax11.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
-    ax11.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Probability}$")
-    fig11.savefig(os.path.join(plots_dir, plot_deltaf1_ens3sw_prob), bbox_inches = 'tight')
+    ax11.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Prediction}$")
+    fig11.savefig(os.path.join(plots_dir, plot_deltaf1_ens5sw_pred), bbox_inches = 'tight')
     fig11.clf()
 
     ax12.legend(loc='lower right', prop={'size': 10}, ncol=4)
-    ax12.set_xlim(2,11)
-    #ax12.set_ylim(-0.15, 0.25)
+    ax12.set_xlim(4,13)
+    ax12.set_ylim(-0.15, 0.1)
     ax12.set_xlabel(r"$\mathrm{Epochs}$")
     ax12.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
-    ax12.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Probability}$")
-    fig12.savefig(os.path.join(plots_dir, plot_deltaf1_ens5sw_prob), bbox_inches = 'tight')
+    ax12.set_title(r"$\mathrm{Sliding \, Window \, (n=9) \, Over \, Prediction}$")
+    fig12.savefig(os.path.join(plots_dir, plot_deltaf1_ens9sw_pred), bbox_inches = 'tight')
     fig12.clf()
+
+    ax13.legend(loc='lower right', prop={'size': 10}, ncol=4)
+    ax13.set_xlim(1,10)
+    ax13.set_ylim(-0.15, 0.1)
+    ax13.set_xlabel(r"$\mathrm{Epochs}$")
+    ax13.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
+    ax13.set_title(r"$\mathrm{Sliding \, Window \, (n=2) \, Over \, Probability}$")
+    fig13.savefig(os.path.join(plots_dir, plot_deltaf1_ens2sw_prob), bbox_inches = 'tight')
+    fig13.clf()
+
+    ax14.legend(loc='lower right', prop={'size': 10}, ncol=4)
+    ax14.set_xlim(1,10)
+    ax14.set_ylim(-0.15,0.1)
+    ax14.set_xlabel(r"$\mathrm{Epochs}$")
+    ax14.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
+    ax14.set_title(r"$\mathrm{Sliding \, Window \, (n=3) \, Over \, Probability}$")
+    fig14.savefig(os.path.join(plots_dir, plot_deltaf1_ens3sw_prob), bbox_inches = 'tight')
+    fig14.clf()
+
+    ax15.legend(loc='lower right', prop={'size': 10}, ncol=4)
+    ax15.set_xlim(2,11)
+    ax15.set_ylim(-0.15, 0.1)
+    ax15.set_xlabel(r"$\mathrm{Epochs}$")
+    ax15.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
+    ax15.set_title(r"$\mathrm{Sliding \, Window \, (n=5) \, Over \, Probability}$")
+    fig15.savefig(os.path.join(plots_dir, plot_deltaf1_ens5sw_prob), bbox_inches = 'tight')
+    fig15.clf()
+
+    ax16.legend(loc='lower right', prop={'size': 10}, ncol=4)
+    ax16.set_xlim(4,13)
+    ax16.set_ylim(-0.15, 0.1)
+    ax16.set_xlabel(r"$\mathrm{Epochs}$")
+    ax16.set_ylabel(r"$\Delta \left(\mathrm{Macro-F1} \right)$")
+    ax16.set_title(r"$\mathrm{Sliding \, Window \, (n=9) \, Over \, Probability}$")
+    fig16.savefig(os.path.join(plots_dir, plot_deltaf1_ens9sw_prob), bbox_inches = 'tight')
+    fig16.clf()
 
 
 ################################################################################
