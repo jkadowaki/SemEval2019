@@ -316,10 +316,10 @@ def main(verbose=False):
     df_eval_metrics = pd.DataFrame(results_dict)
     df_eval_metrics.to_csv(os.path.join(data_dir, eval_metrics_file),
                            index=False, sep='\t')
-    df_eval.to_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
+    df_eval_metrics.to_pickle(os.path.join(data_dir, eval_metrics_pickle_file))
 
     # Dev Accuracy vs. Epoch
-    ax1.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax1.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax1.set_xlim(0,100)
     ax1.set_ylim(0.725, 0.85)
     ax1.set_xlabel(r"$\mathrm{Epochs}$")
@@ -328,7 +328,7 @@ def main(verbose=False):
     fig1.clf()
     
     # Dev F1-Macro vs. Epoch
-    ax2.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax2.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax2.set_xlim(0,100)
     ax2.set_ylim(0.65, 0.83)
     ax2.set_xlabel(r"$\mathrm{Epochs}$")
@@ -337,7 +337,7 @@ def main(verbose=False):
     fig2.clf()
     
     # Dev F1-Micro vs. Epoch
-    ax3.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax3.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax3.set_xlim(0,100)
     ax3.set_ylim(0.725, 0.85)
     ax3.set_xlabel(r"$\mathrm{Epochs}$")
@@ -346,7 +346,7 @@ def main(verbose=False):
     fig3.clf()
     
     # Dev F1-Weighted vs. Epoch
-    ax4.legend(loc='lower center', prop={'size': 12}, ncol=3)
+    ax4.legend(loc='lower center', prop={'size': 10}, ncol=4)
     ax4.set_xlim(0,100)
     ax4.set_ylim(0.725, 0.85)
     ax4.set_xlabel(r"$\mathrm{Epochs}$")
