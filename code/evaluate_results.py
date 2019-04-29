@@ -262,7 +262,7 @@ def main(verbose=False):
         fig8.clf()
         
         # After running the code up to this point, we opted for for this threshold value.
-        threshold = 0.45
+        threshold = 0.4
         predictions = 1*(probability>threshold)
 
 

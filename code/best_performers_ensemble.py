@@ -23,6 +23,7 @@ import evaluation_metrics as em
 import evaluate_results   as er
 from load_data import load_data, extract_fold_metrics
 
+from sklearn.metrics import accuracy_score, f1_score
 
 ################################################################################
 
@@ -119,7 +120,7 @@ def main(verbose=False):
 
 
     ############################################################################
-    #                          Ensemble: Best Performers                       #
+    #                        Ensemble: Best Performers                         #
     ############################################################################
 
     folds = list(np.unique(df_eval['fold']))
@@ -133,6 +134,30 @@ def main(verbose=False):
         print("Fold {0}:".format(f), "\tEpochs:", best)
 
 
+    ############################################################################
+    #                       Ensemble of Epochs {2,3,4}                         #
+    #            Note: Integrate this code with the for loop above.            #
+    ############################################################################
+
+    df_best = df_eval[df_eval['epoch'].isin(best)]
+    
+    for f in folds:
+        predictions = np.vstack(df_best[df_best['fold'] == f]["prediction"].values)
+        ens_pred = (np.sum(predictions, axis=0)/np.size(best) > 0.5).astype(int)
+        gold = df_best[df_best["fold"]==f]['gold_label'].values[0]
+        
+        if np.size(ens_pred) < np.size(gold):
+            gold = gold[1:]
+        
+        f1_pred = f1_score(ens_pred, gold, average='macro')
+
+        probability = np.vstack(df_best[df_best['fold'] == f]["probability"].values)
+        ens_prob = (np.sum(probability, axis=0)/np.size(best) > 0.4).astype(int)
+        f1_prob = f1_score(ens_prob, gold, average='macro')
+
+        print("Fold {0}".format(f),
+              "Macro-F1 (Pred):", f1_pred,
+              "Macro-F1 (Prob):", f1_prob)
 
 
     best = best_performers(df_eval, min_occurence=3, num_ensemble=5, n_best=12,
