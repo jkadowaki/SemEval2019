@@ -169,7 +169,8 @@ def main(verbose=False):
             
             #f1.append(f1_temp)
             #avg_overlap.append(ol_temp)
-            plt.scatter(100*ol_temp, f1_temp,  s=0.1, marker='.')
+            if idx%3==0
+                plt.scatter(100*ol_temp, f1_temp,  s=0.1, marker='.')
 
 
         except:
