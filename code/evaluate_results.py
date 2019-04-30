@@ -267,7 +267,7 @@ def main(verbose=False):
         threshold = 0.4
         predictions = 1*(probability>threshold)
 
-        """
+        
         ########################################################################
         #                              Evaluation                              #
         ########################################################################
@@ -380,7 +380,7 @@ def main(verbose=False):
     ax7.set_ylabel(r"$\mathrm{Overlap \, (\%)}$")
     fig7.savefig(os.path.join(plots_dir, plot_cosprob_overlap), bbox_inches='tight')
     fig7.clf()
-    """
+    
 
 ################################################################################
 

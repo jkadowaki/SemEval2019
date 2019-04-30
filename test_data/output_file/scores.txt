@@ -1,0 +1,5 @@
+accuracy:0.843023
+f1micro:0.843023
+f1macro:0.800512
+f1weighted:0.841203
+extra:0

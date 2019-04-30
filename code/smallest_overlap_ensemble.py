@@ -56,7 +56,7 @@ def main(verbose=False):
     # Columns: Index(['accuracy', 'epoch', 'f1_macro', 'f1_micro', 'f1_weighted',
     #                 'fold', 'gold_label', 'prediction', 'probability']
     df_eval = load_data(data_dir, eval_metrics_pickle_file)
-
+    
 
     ############################################################################
     #                    Ensemble: Smallest Overlap (n=2,3,5)                  #
@@ -67,6 +67,8 @@ def main(verbose=False):
 
     # Plot Baselines
     xlim=[0,100]
+    
+    """
     for ax in [ax1]:
         ax.plot(xlim, [0.829]*2, 'r--', label=r"$\mathrm{Top \, System}$")
         ax.plot(xlim, [0.800]*2, 'g--', label=r"$\mathrm{CNN}$")
@@ -144,7 +146,7 @@ def main(verbose=False):
     fig1.savefig(os.path.join(plots_dir, plot_ol_pairf1),
                  bbox_inches='tight')
     fig1.clf()
-    
+    """
 
     # Super crap code... extremely inefficient. rewrite later!
     # tl;dr:
@@ -162,9 +164,14 @@ def main(verbose=False):
             break
         try:
             pred = em.get_ensemble_prediction(df_eval, 9, ec)
+            f1_temp = f1_score(pred, gold_labels[0], average='macro')
+            ol_temp = sm.average_pairwise(overlap, ec)
             
-            f1.append(f1_score(pred, gold_labels[0], average='macro'))
-            avg_overlap.append(sm.average_pairwise(overlap, ec))
+            #f1.append(f1_temp)
+            #avg_overlap.append(ol_temp)
+            plt.scatter(100*ol_temp, f1_temp,  s=0.1, marker='.')
+
+
         except:
             pass
 
@@ -174,13 +181,13 @@ def main(verbose=False):
     plt.plot(xlim, [0.750]*2, 'k--', label=r"$\mathrm{BiLSTM}$")
     plt.plot(xlim, [0.690]*2, 'b--', label=r"$\mathrm{SVM}$")
 
-    plt.scatter(avg_overlap, f1,  s=0.1, marker='.')
     plt.xlabel(r"$\mathrm{Average \, Pairwise \, Overlap \, (\%)}$")
     plt.ylabel(r"$\mathrm{Macro-F1 \, Score}$")
+    plt.xlim(0,100)
     plt.ylim(.60,.85)
     plt.title(r"$n=3 \mathrm{\, Ensemble \, Scores}$")
     plt.legend(loc='lower center', prop={'size': 10}, ncol=4, frameon=True)
-    plt.savefig('n3_f1_overlap9.pdf')
+    plt.savefig(os.path.join(plots_dir,'n3_f1_overlap9.pdf'))
     plt.close()
 
 
