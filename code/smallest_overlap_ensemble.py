@@ -157,10 +157,10 @@ def main(verbose=False):
     overlap = overlap_percentage(predictions)
     f1 = []
     avg_overlap = []
-
+    plt.figure()
     for idx, ec in enumerate(epoch_combo):
         
-        if idx>35000==0:
+        if idx>100000:
             break
         try:
             pred = em.get_ensemble_prediction(df_eval, 9, ec)
@@ -169,14 +169,14 @@ def main(verbose=False):
             
             #f1.append(f1_temp)
             #avg_overlap.append(ol_temp)
-            if idx%3==0
+            if idx%500==0:
                 plt.scatter(100*ol_temp, f1_temp,  s=0.1, marker='.')
-
+            if idx%10000==0:
+                print(idx)
 
         except:
             pass
 
-    plt.figure()
     plt.plot(xlim, [0.829]*2, 'r--', label=r"$\mathrm{Top \, System}$")
     plt.plot(xlim, [0.800]*2, 'g--', label=r"$\mathrm{CNN}$")
     plt.plot(xlim, [0.750]*2, 'k--', label=r"$\mathrm{BiLSTM}$")
@@ -188,7 +188,7 @@ def main(verbose=False):
     plt.ylim(.60,.85)
     plt.title(r"$n=3 \mathrm{\, Ensemble \, Scores}$")
     plt.legend(loc='lower center', prop={'size': 10}, ncol=4, frameon=True)
-    plt.savefig(os.path.join(plots_dir,'n3_f1_overlap9.pdf'))
+    plt.savefig(os.path.join(plots_dir,'n3_f1_overlap999.pdf'))
     plt.close()
 
 
