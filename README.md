@@ -64,20 +64,11 @@ The [UA-hpc-containers](https://www.singularity-hub.org/collections/2226) Singul
 
 You can also easily download a number of [Singularity containers](https://public.confluence.arizona.edu/display/UAHPC/GPU+Nodes#GPUNodes-NVIDIAGPUCloudContainerRegistry) built by the HPC team.
 
-Create a folder to store containers:
 
-```
-mkdir containers
-cd containers
-```
+* The Singularity image for the model was built to run CUDA and Tensorflow on NVIDIA GPUs in [Ocelote](https://docs.hpc.arizona.edu/display/UAHPC/Ocelote+Quick+Start). We'll be running this model directly from `/unsupported/singularity/nvidia/nvidia-tensorflow.18.09-py3.simg`.
 
-The Singularity image for the model was built to run CUDA and Tensorflow on NVIDIA GPUs in [Ocelote](https://docs.hpc.arizona.edu/display/UAHPC/Ocelote+Quick+Start).
 
-```
-cp /unsupported/singularity/nvidia/nvidia-tensorflow.18.09-py3.simg .
-```
-
-If you are using PyTorch's implementation of BERT, the container can be found here: `/unsupported/singularity/nvidia/nvidia-pytorch.18.09-py3.simg`.
+* If you are using PyTorch's implementation of BERT, the container can be found here: `/unsupported/singularity/nvidia/nvidia-pytorch.18.09-py3.simg`.
 
 _Further Reading_: [Quick Start Guide to Singularity](https://singularity.lbl.gov/quickstart#download-pre-built-images)
 
