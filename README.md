@@ -62,7 +62,9 @@ scp -r local_directory username@filexfer.hpc.arizona.edu:/extra/username/SemEval
 ### Download Singularity Images
 The [UA-hpc-containers](https://www.singularity-hub.org/collections/2226) Singularity Hub contains a repository of Singularity images and recipes for the [AutoMATES team](https://ml4ai.github.io/automates/).
 
-We will run the Singularity image on the cluster. Create a folder to store containers:
+You can also easily download a number of [Singularity containers](https://public.confluence.arizona.edu/display/UAHPC/GPU+Nodes#GPUNodes-NVIDIAGPUCloudContainerRegistry) built by the HPC team.
+
+Create a folder to store containers:
 
 ```
 mkdir containers
@@ -72,7 +74,10 @@ cd containers
 The Singularity image for the model was built to run CUDA and Tensorflow on NVIDIA GPUs in [Ocelote](https://docs.hpc.arizona.edu/display/UAHPC/Ocelote+Quick+Start).
 
 ```
+cp /unsupported/singularity/nvidia/nvidia-tensorflow.18.09-py3.simg .
 ```
+
+If you are using PyTorch's implementation of BERT, the container can be found here: `/unsupported/singularity/nvidia/nvidia-pytorch.18.09-py3.simg`.
 
 _Further Reading_: [Quick Start Guide to Singularity](https://singularity.lbl.gov/quickstart#download-pre-built-images)
 
